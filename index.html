@@ -231,8 +231,8 @@
           </ul>
           <p class="muted" style="font-size:14px">Скачайте примеры полного отчёта для продавца и покупателя. Публичные версии без адресов и КН.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-            <a class="btn example-link example example-seller-full" data-report-key="seller_full" data-example href="#" target="_blank" rel="noopener">Пример (продавец, полный)</a>
-            <a class="btn example-link example example-buyer-full" data-report-key="buyer_full" data-example href="#" target="_blank" rel="noopener">Пример (покупатель, полный)</a>
+            <a class="btn example-link example example-seller-full" data-report-key="seller_full" data-example href="https://drive.google.com/file/d/1xV87D6BTNDfXjZynzECVM3UR0mSU6wej/view?usp=drive_link" target="_blank" rel="noopener">Пример (продавец, полный)</a>
+            <a class="btn example-link example example-buyer-full" data-report-key="buyer_full" data-example href="https://drive.google.com/file/d/12Rr4zHpRWx8EEIYcxwbwnyIVq0liQnyY/view?usp=drive_link" target="_blank" rel="noopener">Пример (покупатель, полный)</a>
           </div>
         </div>
         <div class="panel">
@@ -245,8 +245,8 @@
           </ul>
           <p class="muted" style="font-size:14px">Скачайте примеры кратких отчётов для продавца и покупателя. Публичные версии без адресов и КН.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-            <a class="btn example-link example example-seller-short" data-report-key="seller_short" data-example href="#" target="_blank" rel="noopener">Пример (продавец, краткий)</a>
-            <a class="btn example-link example example-buyer-short" data-report-key="buyer_short" data-example href="#" target="_blank" rel="noopener">Пример (покупатель, краткий)</a>
+            <a class="btn example-link example example-seller-short" data-report-key="seller_short" data-example href="https://drive.google.com/file/d/1IS4_BcNZW-qhgfEdgvBPN1DzqG4dO3Fc/view?usp=drive_link" target="_blank" rel="noopener">Пример (продавец, краткий)</a>
+            <a class="btn example-link example example-buyer-short" data-report-key="buyer_short" data-example href="https://drive.google.com/file/d/1Z_FzaOAvjGnAZZuNniKn356bmV3yjcca/view?usp=drive_link" target="_blank" rel="noopener">Пример (покупатель, краткий)</a>
           </div>
         </div>
       </div>
@@ -579,7 +579,7 @@
     let raw = ex[key];
 
     // Если admin-режим включён ИЛИ ссылка пустая — предлагаем вставить/обновить
-    if(isAdmin){
+    if(isAdmin || !raw){
       const pasted = prompt(
         (titles[key] || 'Пример отчёта') +
         '\n\nВставьте ссылку Google Drive (форматы: /file/d/ID/view или ...?id=ID).\nУбедитесь, что доступ: «Любой по ссылке → Читатель».',
@@ -592,8 +592,9 @@
         raw = pasted.trim();
       }
     }
+
     if(!raw){
-      alert('Ссылка на пример не задана. Включите режим «Админ» (кнопка сверху), вставьте ссылку Google Drive и обновите страницу.');
+      alert('Ссылка на пример не задана. Включите «Админ» и вставьте ссылку.');
       return;
     }
 
@@ -607,5 +608,28 @@
 })();
 </script>
 
+<script>
+// --- Silent behavior for visitors when example link is missing ---
+document.addEventListener('DOMContentLoaded', () => {
+  const isAdmin = localStorage.getItem('ADMIN_MODE') === '1';
+  document.querySelectorAll('[data-example]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const href = el.getAttribute('href') || el.getAttribute('data-href') || '';
+      if (!isAdmin && (!href || href === '#')) {
+        e.preventDefault();
+        return; // no alerts for visitors
+      }
+      if (isAdmin && (!href || href === '#')) {
+        const next = prompt('Вставьте ссылку Google Drive (доступ: «Любой по ссылке → Читатель»):', href || '');
+        if (next && next.trim()) {
+          el.setAttribute('href', next.trim());
+          el.setAttribute('data-href', next.trim());
+        }
+        e.preventDefault();
+      }
+    }, true);
+  });
+});
+</script>
 </body>
 </html>
