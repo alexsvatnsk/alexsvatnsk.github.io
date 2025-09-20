@@ -231,8 +231,8 @@
           </ul>
           <p class="muted" style="font-size:14px">Скачайте примеры полного отчёта для продавца и покупателя. Публичные версии без адресов и КН.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-            <button type="button" class="btn example-link" data-report-key="seller_full">Пример (продавец, полный)</button>
-            <button type="button" class="btn example-link" data-report-key="buyer_full">Пример (покупатель, полный)</button>
+            <a class="btn example-link example example-seller-full" data-report-key="seller_full" data-example href="#" target="_blank" rel="noopener">Пример (продавец, полный)</a>
+            <a class="btn example-link example example-buyer-full" data-report-key="buyer_full" data-example href="#" target="_blank" rel="noopener">Пример (покупатель, полный)</a>
           </div>
         </div>
         <div class="panel">
@@ -245,8 +245,8 @@
           </ul>
           <p class="muted" style="font-size:14px">Скачайте примеры кратких отчётов для продавца и покупателя. Публичные версии без адресов и КН.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-            <button type="button" class="btn example-link" data-report-key="seller_short">Пример (продавец, краткий)</button>
-            <button type="button" class="btn example-link" data-report-key="buyer_short">Пример (покупатель, краткий)</button>
+            <a class="btn example-link example example-seller-short" data-report-key="seller_short" data-example href="#" target="_blank" rel="noopener">Пример (продавец, краткий)</a>
+            <a class="btn example-link example example-buyer-short" data-report-key="buyer_short" data-example href="#" target="_blank" rel="noopener">Пример (покупатель, краткий)</a>
           </div>
         </div>
       </div>
@@ -579,7 +579,7 @@
     let raw = ex[key];
 
     // Если admin-режим включён ИЛИ ссылка пустая — предлагаем вставить/обновить
-    if(isAdmin || !raw){
+    if(isAdmin){
       const pasted = prompt(
         (titles[key] || 'Пример отчёта') +
         '\n\nВставьте ссылку Google Drive (форматы: /file/d/ID/view или ...?id=ID).\nУбедитесь, что доступ: «Любой по ссылке → Читатель».',
@@ -592,9 +592,8 @@
         raw = pasted.trim();
       }
     }
-
     if(!raw){
-      alert('Ссылка на пример не задана. Включите «Админ» и вставьте ссылку.');
+      alert('Ссылка на пример не задана. Включите режим «Админ» (кнопка сверху), вставьте ссылку Google Drive и обновите страницу.');
       return;
     }
 
