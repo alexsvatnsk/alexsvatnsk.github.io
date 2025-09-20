@@ -6,7 +6,7 @@
 <title>Земельные отчёты — анализ / проверка / оценка по кадастровому номеру</title>
 <meta name="description" content="Проверка, анализ и оценка земельных участков по кадастровому номеру. Отчёты для продавцов и покупателей."/>
 
-<!-- Base styles (kept close to your original) -->
+<!-- Base styles -->
 <style>
   :root{
     --bg0:#0b1533; --bg1:#0e1a3d; --card:#0f1d41; --line:rgba(255,255,255,.12);
@@ -62,7 +62,7 @@
   /* Reviews */
   @media (max-width:980px){#reviews .grid{grid-template-columns:1fr}}
 
-  /* ==== FORM (single section, framed, no tail) ==== */
+  /* ==== FORM (iframe embed; no negative offsets) ==== */
   #form .panel{
     display:flex;justify-content:center;
     padding:0 !important;background:transparent !important;
@@ -71,10 +71,11 @@
   .form-frame{
     max-width: 760px;
     width: 100%;
-    height: 1220px;        /* подгоняемая видимая высота */
+    min-height: 900px;
+    height: auto;
     margin: 0 auto;
     border-radius: 20px;
-    overflow: hidden;      /* убирает «хвост» */
+    overflow: hidden;
     background:#0e1e42;
     box-shadow:
       0 0 0 1px rgba(39,201,255,.18),
@@ -83,20 +84,17 @@
     position: relative;
   }
   .form-frame iframe{
-    position:absolute;
-    top:-170px;            /* прячет белую шапку формы */
-    left:0; width:100%;
-    height:2010px;         /* больше контейнера, чтобы не мелькал низ */
+    display:block;
+    width:100%;
+    min-height:900px;
     border:0;
     background:#0e1e42;
-    transform:scale(1.0);
-    transform-origin:top center;
   }
   .form-note{max-width:760px;margin:10px auto 0;text-align:center;font-size:14px;opacity:.85}
 
   @media (max-width:600px){
-    .form-frame{max-width:100%; height:1700px;}
-    .form-frame iframe{top:-95px;height:2150px;transform:scale(1.0);}
+    .form-frame{max-width:100%;}
+    .form-frame iframe{min-height:1000px;}
   }
 
   /* ==== FOOTER tidy 4‑column ==== */
@@ -119,11 +117,12 @@
   window.SITE_CONFIG = window.SITE_CONFIG || {};
   window.SITE_CONFIG.ADMIN_KEY = "070495";
   window.SITE_CONFIG.TELEGRAM_BOT = "AndPlotReportBot";
+  // Заполняем ссылки примеров, чтобы открывались в окне без «Админ»
   window.SITE_CONFIG.EXAMPLES = {
-    seller_full:  "",
-    buyer_full:   "",
-    seller_short: "",
-    buyer_short:  ""
+    seller_full:  "https://drive.google.com/file/d/1xV87D6BTNDfXjZynzECVM3UR0mSU6wej/view?usp=drive_link",
+    buyer_full:   "https://drive.google.com/file/d/12Rr4zHpRWx8EEIYcxwbwnyIVq0liQnyY/view?usp=drive_link",
+    seller_short: "https://drive.google.com/file/d/1IS4_BcNZW-qhgfEdgvBPN1DzqG4dO3Fc/view?usp=drive_link",
+    buyer_short:  "https://drive.google.com/file/d/1Z_FzaOAvjGnAZZuNniKn356bmV3yjcca/view?usp=drive_link"
   };
 </script>
 
@@ -156,7 +155,6 @@
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
           <a class="btn primary" href="#form">Заказать отчёт</a>
           <a class="btn" href="https://t.me/AndPlotReportBot" target="_blank" rel="noopener">Отправить в Telegram</a>
-
         </div>
         <div class="stat-cards">
           <div class="card"><div class="muted" style="font-size:12px">Точность</div><div style="font-size:22px;color:var(--ink-strong);font-weight:800">до 95%</div><div class="muted" style="font-size:12px">по открытым данным</div></div>
@@ -264,7 +262,7 @@
     </div>
   </section>
 
-  <!-- REVIEWS (оставлено как в вашем файле) -->
+  <!-- REVIEWS -->
   <section class="section" id="reviews">
     <div class="container">
       <h2>Отзывы клиентов</h2>
@@ -330,6 +328,7 @@
         }
         function adminMode(on){
           document.body.dataset.admin = on ? '1' : '';
+          localStorage.setItem('ADMIN_MODE', on ? '1' : '');
           grid.querySelectorAll('.rev-del').forEach(el=>{ el.style.display = on ? 'inline-flex' : 'none'; });
         }
         function saveStore(list){ try{ localStorage.setItem('reviews_custom_v1', JSON.stringify(list)); }catch(e){} }
@@ -380,16 +379,26 @@
           del.addEventListener('click', ()=>{ card.remove(); });
         });
         renderStored();
+
+        // Инициализация Admin из localStorage (если уже включали)
+        if(localStorage.getItem('ADMIN_MODE') === '1'){ adminMode(true); }
+
+        // Кнопка включения Админ
+        const btnsAdmin = document.querySelectorAll('.btnAdmin');
+        btnsAdmin.forEach(b=>b.addEventListener('click', ()=>{
+          const k = prompt('Код администратора:');
+          if(k === ADMIN_KEY){ adminMode(true); alert('Режим Админ включён. Клик по «Пример…» позволяет заменить ссылку Google Drive.'); }
+          else { adminMode(false); alert('Неверный код.'); }
+        }));
       })();
       </script>
     </div>
   </section>
 
-  <!-- FORM (единственная секция) -->
-  
-<section class="section" id="faq">
-  <div class="container">
-    <h2>Частые вопросы (FAQ)</h2>
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="container">
+      <h2>Частые вопросы (FAQ)</h2>
 
     <details open>
       <summary>Сколько делается отчёт?</summary>
@@ -420,25 +429,28 @@
       <summary>Как связаться?</summary>
       <div class="muted">Телефон/WhatsApp: +7&nbsp;913&nbsp;912-94-28 • Telegram-канал «Земельные участки Проверка/анализ/оценка/отчёт» • Бот: @AndPlotReportBot • E‑mail: plotreport@mail.ru.</div>
     </details>
-  </div>
-</section>
+    </div>
+  </section>
 
-
+  <!-- FORM -->
   <section class="section" id="form">
     <div class="container">
       <h2>Оформить заявку</h2>
       <div class="panel">
         <div class="form-frame">
+          <!-- Официальный embed Яндекс Формы с авто‑ресайзом -->
           <iframe
-            src="https://forms.yandex.ru/u/68ca6c22d0468804c8356815/?utm_source=site"
+            src="https://forms.yandex.ru/u/68ca6c22d0468804c8356815/?iframe=1&utm_source=site"
+            name="ya-form-68ca6c22d0468804c8356815"
             loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
+            frameborder="0"
+            allow="clipboard-write; fullscreen">
           </iframe>
         </div>
       </div>
       <p class="form-note">
         Если форма не загрузилась —
-        <a href="https://forms.yandex.ru/u/68ca6c22d0468804c8356815/?utm_source=site" target="_blank" rel="noopener">
+        <a href="https://forms.yandex.ru/u/68ca6c22d0468804c8356815/?iframe=1&utm_source=site" target="_blank" rel="noopener">
           открыть в новой вкладке
         </a>.
       </p>
@@ -447,7 +459,7 @@
 
 </main>
 
-<!-- FOOTER with tidy contacts -->
+<!-- FOOTER -->
 <footer class="site-footer" id="contacts">
   <div class="container">
     <div class="footer-grid">
@@ -479,6 +491,7 @@
     <div class="copy">© «Земельные отчёты». Не публичная оферта.</div>
   </div>
 </footer>
+
 <!-- === ВСТРОЕННЫЙ ПРОСМОТРЩИК PDF === -->
 <dialog id="pdfViewer" style="width:min(1100px,96vw); height:min(90vh,900px); border:none; border-radius:16px; padding:0; overflow:hidden; background:#0f1d41; color:#dce7ff">
   <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.14); background:rgba(8,12,40,.7)">
@@ -491,43 +504,15 @@
   <iframe id="pdfFrame" style="width:100%; height:calc(100% - 52px); border:0; background:#0b1533"></iframe>
 </dialog>
 
-<script>
-(function(){
-  const ADMIN_KEY = (window.SITE_CONFIG && window.SITE_CONFIG.ADMIN_KEY) || "070495";
-
-  function setAdmin(on){
-    // флаг для остальных скриптов
-    document.body.dataset.admin = on ? '1' : '';
-    // показать/скрыть «Удалить» в отзывах
-    document.querySelectorAll('.rev-del').forEach(el=>{
-      el.style.display = on ? 'inline-flex' : 'none';
-    });
-  }
-
-  document.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.btnAdmin');
-    if(!btn) return;
-    const k = prompt('Код администратора:');
-    if(k === ADMIN_KEY){
-      setAdmin(true);
-      alert('Режим Админ включён. Теперь клик по «Пример…» предложит вставить ссылку Google Drive.');
-    } else {
-      setAdmin(false);
-      alert('Неверный код.');
-    }
-  });
-})();
-</script>
+<!-- === Скрипт модалки примеров (единственный, без конфликтов) === -->
 <script>
 (function(){
   const EX_DEFAULTS = (window.SITE_CONFIG && window.SITE_CONFIG.EXAMPLES) || {};
   const STORE_KEY = 'examples_overrides_v1';
 
-  // localStorage: загрузить/сохранить введённые через Админ ссылки
   function loadOverrides(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'{}'); }catch(e){ return {}; } }
   function saveOverrides(obj){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }catch(e){} }
 
-  // Текущая карта ссылок = localStorage ⊕ дефолты
   function getExamples(){
     const ovr = loadOverrides();
     return {
@@ -538,10 +523,9 @@
     };
   }
 
-  // Преобразование в встраиваемый просмотр: Google Drive → /preview
   function toPreview(raw){
     if(!raw) return '';
-    if(/\.(pdf)(\?|#|$)/i.test(raw)) return raw; // прямой .pdf
+    if(/\.(pdf)(\?|#|$)/i.test(raw)) return raw;
     let m = raw.match(/drive\.google\.com\/file\/d\/([^\/\?\#]+)/i);
     if(m) return 'https://drive.google.com/file/d/'+m[1]+'/preview';
     m = raw.match(/[?&]id=([^&]+)/i);
@@ -549,7 +533,6 @@
     return raw;
   }
 
-  // Заголовки для окна
   const titles = {
     seller_full:  'Пример (продавец, полный)',
     buyer_full:   'Пример (покупатель, полный)',
@@ -557,7 +540,6 @@
     buyer_short:  'Пример (покупатель, краткий)',
   };
 
-  // Элементы модалки
   const dlg   = document.getElementById('pdfViewer');
   const frame = document.getElementById('pdfFrame');
   const title = document.getElementById('pdfTitle');
@@ -568,18 +550,26 @@
   dlg?.addEventListener('click', (e)=>{ if(e.target === dlg) dlg.close(); });
   dlg?.addEventListener('cancel', ()=> dlg.close());
 
-  // Главный обработчик кликов по кнопкам «Пример…»
   document.addEventListener('click', (e)=>{
     const btn = e.target.closest('.example-link');
     if(!btn) return;
+    e.preventDefault();
 
     const key = btn.getAttribute('data-report-key');
-    const isAdmin = !!document.body.dataset.admin; // включён ли режим Админ (см. скрипт выше)
+
+    // 1) Берём ссылку из настроек/overrides
     const ex = getExamples();
     let raw = ex[key];
 
-    // Если admin-режим включён ИЛИ ссылка пустая — предлагаем вставить/обновить
-    if(isAdmin || !raw){
+    // 2) Если там пусто — берём href самой кнопки как запасной вариант
+    if(!raw){
+      const href = btn.getAttribute('href') || btn.getAttribute('data-href') || '';
+      raw = href;
+    }
+
+    // 3) Если admin-режим включён — позволяем заменить ссылку
+    const isAdmin = !!document.body.dataset.admin || localStorage.getItem('ADMIN_MODE') === '1';
+    if(isAdmin){
       const pasted = prompt(
         (titles[key] || 'Пример отчёта') +
         '\n\nВставьте ссылку Google Drive (форматы: /file/d/ID/view или ...?id=ID).\nУбедитесь, что доступ: «Любой по ссылке → Читатель».',
@@ -594,47 +584,21 @@
     }
 
     if(!raw){
-      alert('Ссылка на пример не задана. Включите «Админ» и вставьте ссылку.');
+      alert('Ссылка на пример не задана.');
       return;
     }
 
     // Открываем внутри модалки
     const src = toPreview(raw);
     title.textContent = titles[key] || 'Пример отчёта';
-    link.href = raw;      // «Открыть» → оригинальная ссылка
-    frame.src = src;      // iframe → встраиваемый /preview
+    link.href = raw;
+    frame.src = src;
     dlg.showModal();
   });
 })();
 </script>
 
-<script>
-// --- Example links: open in same tab; admin can set links via prompt; visitors see no alerts ---
-document.addEventListener('DOMContentLoaded', () => {
-  const isAdmin = () => localStorage.getItem('ADMIN_MODE') === '1';
-  document.querySelectorAll('[data-example]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      const href = el.getAttribute('href') || el.getAttribute('data-href') || '';
-      if (isAdmin() && (!href || href === '#')) {
-        const next = prompt('Вставьте ссылку Google Drive (доступ: «Любой по ссылке → Читатель»):', href || '');
-        if (next && next.trim()) {
-          el.setAttribute('href', next.trim());
-          el.setAttribute('data-href', next.trim());
-        }
-        e.preventDefault();
-        return;
-      }
-      if (!href || href === '#') {
-        // нет ссылки — просто игнорируем клик у посетителя
-        e.preventDefault();
-        return;
-      }
-      // всегда открываем в этой же вкладке
-      e.preventDefault();
-      window.location.assign(href);
-    }, true);
-  });
-});
-</script>
+<!-- Официальный авто‑ресайзер Яндекс Форм -->
+<script src="https://yastatic.net/s3/frontend/forms/_/embed.js"></script>
 </body>
 </html>
