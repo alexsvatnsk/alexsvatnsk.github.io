@@ -608,33 +608,35 @@
 })();
 </script>
 
+
+<!-- Single-open handler for example links -->
 <script>
-// --- Example links: open in same tab; admin can set links via prompt; visitors see no alerts ---
-document.addEventListener('DOMContentLoaded', () => {
-  const isAdmin = () => localStorage.getItem('ADMIN_MODE') === '1';
-  document.querySelectorAll('[data-example]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      const href = el.getAttribute('href') || el.getAttribute('data-href') || '';
-      if (isAdmin() && (!href || href === '#')) {
+(function(){
+  function isAdmin(){ return localStorage.getItem('ADMIN_MODE') === '1'; }
+  function onClick(e){
+    const a = e.target.closest('[data-example]');
+    if(!a) return;
+    const href = a.getAttribute('href') || a.getAttribute('data-href') || '';
+    // Block any default/other handlers to prevent double-open
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+    if (!href || href === '#'){
+      if (isAdmin()){
         const next = prompt('Вставьте ссылку Google Drive (доступ: «Любой по ссылке → Читатель»):', href || '');
-        if (next && next.trim()) {
-          el.setAttribute('href', next.trim());
-          el.setAttribute('data-href', next.trim());
+        if (next && next.trim()){
+          a.setAttribute('href', next.trim());
+          a.setAttribute('data-href', next.trim());
         }
-        e.preventDefault();
-        return;
       }
-      if (!href || href === '#') {
-        // нет ссылки — просто игнорируем клик у посетителя
-        e.preventDefault();
-        return;
-      }
-      // всегда открываем в этой же вкладке
-      e.preventDefault();
-      window.location.assign(href);
-    }, true);
-  });
-});
+      return;
+    }
+    // Open strictly in the same tab
+    window.location.assign(href);
+  }
+  document.addEventListener('click', onClick, true); // capture phase
+})();
 </script>
+
 </body>
 </html>
