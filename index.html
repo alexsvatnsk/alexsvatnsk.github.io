@@ -137,8 +137,7 @@
       <a class="btn" href="#reports">Отчёты</a>
       <a class="btn" href="#reviews">Отзывы</a>
       <a class="btn" href="#prices">Цены</a>
-      <button class="btn ghost btnAdmin" type="button" title="Режим администратора">Админ</button>
-      <a class="btn primary" href="#form">Заказать отчёт</a>
+<a class="btn primary" href="#form">Заказать отчёт</a>
     </div>
   </div>
 </header>
@@ -266,133 +265,12 @@
   <section class="section" id="reviews">
     <div class="container">
       <h2>Отзывы клиентов</h2>
-      <div class="actions" style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 4px">
-        <button class="btn primary" id="btnOpenReview">Оставить отзыв</button>
-        <button class="btn btnAdmin" id="btnAdmin">Админ</button>
-      </div>
       <div id="reviewsGrid" class="grid" style="display:grid;gap:16px;grid-template-columns:repeat(3,1fr)">
         <div class="panel"><div style="color:#ffd166;font-size:18px">★ ★ ★ ★ ★ </div><div style="font-weight:700;margin-top:4px">Иван П., Новосибирск</div><p>Сделали за день. Показали риски и подсказали цену. Выставил объявление — пошли звонки.</p><button class="btn ghost rev-del" style="display:none;margin-top:8px" title="Удалить отзыв">Удалить</button></div>
         <div class="panel"><div style="color:#ffd166;font-size:18px">★ ★ ★ ★ </div><div style="font-weight:700;margin-top:4px">Мария К., Казань</div><p>Всё отлично, но ждал долго — 3 дня. Отчёт подробный, рекомендации помогли на торге.</p><button class="btn ghost rev-del" style="display:none;margin-top:8px" title="Удалить отзыв">Удалить</button></div>
         <div class="panel"><div style="color:#ffd166;font-size:18px">★ ★ ★ ★ ★ </div><div style="font-weight:700;margin-top:4px">Сергей Л., Санкт‑Петербург</div><p>Дали готовые тексты объявлений и советы по фото — продал быстрее, чем ожидал.</p><button class="btn ghost rev-del" style="display:none;margin-top:8px" title="Удалить отзыв">Удалить</button></div>
       </div>
-
-      <dialog id="reviewDlg" style="width:min(720px,92vw);border:none;border-radius:16px;padding:0;overflow:hidden;background:#0f1d41;color:#dce7ff">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.14);background:rgba(8,12,40,.7)">
-          <strong>Оставить отзыв</strong>
-          <button class="btn ghost" id="dlgClose">Закрыть</button>
-        </div>
-        <div style="padding:14px">
-          <form id="reviewForm" novalidate>
-            <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr">
-              <div><label>Имя *</label><input name="name" placeholder="Иван" required style="width:100%;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(8,16,40,.6);color:#dce7ff"/></div>
-              <div><label>Город</label><input name="city" placeholder="Новосибирск" style="width:100%;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(8,16,40,.6);color:#dce7ff"/></div>
-            </div>
-            <div style="display:grid;gap:10px;grid-template-columns:1fr">
-              <div><label>Оценка</label>
-                <select name="rating" style="width:100%;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(8,16,40,.6);color:#dce7ff">
-                  <option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option>
-                </select>
-              </div>
-              <div><label>Отзыв *</label><textarea name="text" placeholder="Что было полезно? Что улучшить?" required style="width:100%;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(8,16,40,.6);color:#dce7ff;min-height:120px"></textarea></div>
-            </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-              <button class="btn primary" type="submit">Опубликовать</button>
-              <button class="btn" id="dlgCancel" type="button">Отмена</button>
-            </div>
-          </form>
-        </div>
-      </dialog>
-
-      <script>
-      (function(){
-        const ADMIN_KEY = (window.SITE_CONFIG && window.SITE_CONFIG.ADMIN_KEY) || '070495';
-        const dlg = document.getElementById('reviewDlg');
-        const btnOpen = document.getElementById('btnOpenReview');
-        const btnAdmin = document.getElementById('btnAdmin');
-        const btnClose = document.getElementById('dlgClose');
-        const btnCancel = document.getElementById('dlgCancel');
-        const form = document.getElementById('reviewForm');
-        const grid = document.getElementById('reviewsGrid');
-        function renderStars(n){ return '★ '.repeat(n).trim(); }
-        function addDeleteButton(card){
-          let btn = card.querySelector('.rev-del');
-          if(!btn){
-            btn = document.createElement('button');
-            btn.className = 'btn ghost rev-del';
-            btn.textContent = 'Удалить';
-            btn.style.display = 'none';
-            btn.title = 'Удалить отзыв';
-            card.appendChild(btn);
-          }
-          return btn;
-        }
-        function adminMode(on){
-          document.body.dataset.admin = on ? '1' : '';
-          localStorage.setItem('ADMIN_MODE', on ? '1' : '');
-          grid.querySelectorAll('.rev-del').forEach(el=>{ el.style.display = on ? 'inline-flex' : 'none'; });
-        }
-        function saveStore(list){ try{ localStorage.setItem('reviews_custom_v1', JSON.stringify(list)); }catch(e){} }
-        function loadStore(){ try{ return JSON.parse(localStorage.getItem('reviews_custom_v1')||'[]'); }catch(e){ return []; } }
-        function cardFromData(d){
-          const card = document.createElement('div');
-          card.className = 'panel';
-          card.dataset.id = d.id;
-          const stars = document.createElement('div'); stars.style.cssText='color:#ffd166;font-size:18px'; stars.textContent=renderStars(d.rating||5);
-          const head = document.createElement('div'); head.style.cssText='font-weight:700;margin-top:4px'; head.textContent=(d.name||'Гость') + (d.city?(', '+d.city):'');
-          const p = document.createElement('p'); p.textContent=d.text||'';
-          card.append(stars, head, p);
-          const del = addDeleteButton(card);
-          del.addEventListener('click', ()=>{
-            card.remove();
-            const store = loadStore().filter(x=>x.id !== d.id);
-            saveStore(store);
-          });
-          return card;
-        }
-        function renderStored(){
-          const store = loadStore();
-          for(const d of store){
-            const card = cardFromData(d);
-            grid.insertBefore(card, grid.firstChild);
-          }
-        }
-        btnOpen?.addEventListener('click', ()=>dlg.showModal());
-        btnClose?.addEventListener('click', ()=>dlg.close());
-        btnCancel?.addEventListener('click', ()=>dlg.close());
-        dlg?.addEventListener('click', (e)=>{ if(e.target===dlg) dlg.close(); });
-        
-        form?.addEventListener('submit', (e)=>{
-          e.preventDefault();
-          const fd = new FormData(form);
-          const name = (fd.get('name')||'').toString().trim();
-          const city = (fd.get('city')||'').toString().trim();
-          const rating = parseInt(fd.get('rating')||'5',10);
-          const text = (fd.get('text')||'').toString().trim();
-          if(!name || !text){ alert('Укажите имя и текст отзыва.'); return; }
-          const d = { id: 'r'+Date.now(), name, city, rating, text, ts: Date.now() };
-          const store = loadStore(); store.unshift(d); saveStore(store);
-          const card = cardFromData(d); grid.insertBefore(card, grid.firstChild);
-          form.reset(); dlg.close();
-        });
-        grid.querySelectorAll('.panel').forEach(card=>{
-          const del = addDeleteButton(card);
-          del.addEventListener('click', ()=>{ card.remove(); });
-        });
-        renderStored();
-
-        // Инициализация Admin из localStorage (если уже включали)
-        if(localStorage.getItem('ADMIN_MODE') === '1'){ adminMode(true); }
-
-        // Кнопка включения Админ
-        const btnsAdmin = document.querySelectorAll('.btnAdmin');
-        btnsAdmin.forEach(b=>b.addEventListener('click', ()=>{
-          const k = prompt('Код администратора:');
-          if(k === ADMIN_KEY){ adminMode(true); alert('Режим Админ включён. Клик по «Пример…» позволяет заменить ссылку Google Drive.'); }
-          else { adminMode(false); alert('Неверный код.'); }
-        }));
-      })();
-      </script>
-    </div>
+</div>
   </section>
 
   <!-- FAQ -->
@@ -505,100 +383,8 @@
 </dialog>
 
 <!-- === Скрипт модалки примеров (единственный, без конфликтов) === -->
-<script>
-(function(){
-  const EX_DEFAULTS = (window.SITE_CONFIG && window.SITE_CONFIG.EXAMPLES) || {};
-  const STORE_KEY = 'examples_overrides_v1';
-
-  function loadOverrides(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'{}'); }catch(e){ return {}; } }
-  function saveOverrides(obj){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }catch(e){} }
-
-  function getExamples(){
-    const ovr = loadOverrides();
-    return {
-      seller_full:  ovr.seller_full  ?? EX_DEFAULTS.seller_full  ?? '',
-      buyer_full:   ovr.buyer_full   ?? EX_DEFAULTS.buyer_full   ?? '',
-      seller_short: ovr.seller_short ?? EX_DEFAULTS.seller_short ?? '',
-      buyer_short:  ovr.buyer_short  ?? EX_DEFAULTS.buyer_short  ?? '',
-    };
-  }
-
-  function toPreview(raw){
-    if(!raw) return '';
-    if(/\.(pdf)(\?|#|$)/i.test(raw)) return raw;
-    let m = raw.match(/drive\.google\.com\/file\/d\/([^\/\?\#]+)/i);
-    if(m) return 'https://drive.google.com/file/d/'+m[1]+'/preview';
-    m = raw.match(/[?&]id=([^&]+)/i);
-    if(m) return 'https://drive.google.com/file/d/'+m[1]+'/preview';
-    return raw;
-  }
-
-  const titles = {
-    seller_full:  'Пример (продавец, полный)',
-    buyer_full:   'Пример (покупатель, полный)',
-    seller_short: 'Пример (продавец, краткий)',
-    buyer_short:  'Пример (покупатель, краткий)',
-  };
-
-  const dlg   = document.getElementById('pdfViewer');
-  const frame = document.getElementById('pdfFrame');
-  const title = document.getElementById('pdfTitle');
-  const link  = document.getElementById('pdfOpenRaw');
-  const btnClose = document.getElementById('pdfClose');
-
-  btnClose?.addEventListener('click', ()=> dlg.close());
-  dlg?.addEventListener('click', (e)=>{ if(e.target === dlg) dlg.close(); });
-  dlg?.addEventListener('cancel', ()=> dlg.close());
-
-  document.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.example-link');
-    if(!btn) return;
-    e.preventDefault();
-
-    const key = btn.getAttribute('data-report-key');
-
-    // 1) Берём ссылку из настроек/overrides
-    const ex = getExamples();
-    let raw = ex[key];
-
-    // 2) Если там пусто — берём href самой кнопки как запасной вариант
-    if(!raw){
-      const href = btn.getAttribute('href') || btn.getAttribute('data-href') || '';
-      raw = href;
-    }
-
-    // 3) Если admin-режим включён — позволяем заменить ссылку
-    const isAdmin = !!document.body.dataset.admin || localStorage.getItem('ADMIN_MODE') === '1';
-    if(isAdmin){
-      const pasted = prompt(
-        (titles[key] || 'Пример отчёта') +
-        '\n\nВставьте ссылку Google Drive (форматы: /file/d/ID/view или ...?id=ID).\nУбедитесь, что доступ: «Любой по ссылке → Читатель».',
-        raw || ''
-      );
-      if(pasted){
-        const ovr = loadOverrides();
-        ovr[key] = pasted.trim();
-        saveOverrides(ovr);
-        raw = pasted.trim();
-      }
-    }
-
-    if(!raw){
-      alert('Ссылка на пример не задана.');
-      return;
-    }
-
-    // Открываем внутри модалки
-    const src = toPreview(raw);
-    title.textContent = titles[key] || 'Пример отчёта';
-    link.href = raw;
-    frame.src = src;
-    dlg.showModal();
-  });
-})();
-</script>
-
 <!-- Официальный авто‑ресайзер Яндекс Форм -->
 <script src="https://yastatic.net/s3/frontend/forms/_/embed.js"></script>
 </body>
 </html>
+
