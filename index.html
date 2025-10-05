@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -395,11 +396,77 @@
   <iframe id="pdfFrame" style="width:100%; height:calc(100% - 52px); border:0; background:#0b1533"></iframe>
 </dialog>
 
+  <!-- === Скрипт модалки примеров (открывает PDF внутри сайта) === -->
+  <script>
+    // Этот скрипт делает так, что ссылки‑примеры отчётов не уводят посетителя на другую вкладку,
+    // а открывают документ во встроенном модальном окне. Он отлавливает клики по
+    // элементам с атрибутом data‑example, отменяет стандартное поведение и
+    // подставляет адрес PDF в iframe внутри диалога. Источник ссылки берётся либо
+    // из window.SITE_CONFIG.EXAMPLES по ключу data‑report‑key, либо непосредственно
+    // из href элемента.
+    document.addEventListener('DOMContentLoaded', function () {
+      var exampleLinks = document.querySelectorAll('[data-example]');
+      var viewer = document.getElementById('pdfViewer');
+      var frame = document.getElementById('pdfFrame');
+      var title = document.getElementById('pdfTitle');
+      var openRaw = document.getElementById('pdfOpenRaw');
+      var closeBtn = document.getElementById('pdfClose');
+
+      function convertToPreview(url) {
+        // Если это ссылка Google Drive, преобразуем её в формат preview для встраивания
+        try {
+          var match = url.match(/https?:\/\/drive\.google\.com\/file\/d\/([\w-]+)/);
+          if (match) {
+            var id = match[1];
+            return 'https://drive.google.com/file/d/' + id + '/preview';
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        return url;
+      }
+
+      exampleLinks.forEach(function (link) {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          // Определяем адрес отчёта по ключу или напрямую из href
+          var key = link.dataset.reportKey;
+          var href = link.getAttribute('href');
+          var url = (window.SITE_CONFIG && window.SITE_CONFIG.EXAMPLES && window.SITE_CONFIG.EXAMPLES[key]) || href;
+          var preview = convertToPreview(url);
+          // Обновляем iframe, заголовок и ссылку для открытия в новой вкладке при желании
+          frame.src = preview;
+          title.textContent = link.textContent.trim();
+          openRaw.href = url;
+          // Показываем диалог. showModal поддерживается далеко не во всех браузерах,
+          // поэтому на всякий случай fallback на отображение блока.
+          if (viewer.showModal) {
+            viewer.showModal();
+          } else {
+            viewer.setAttribute('open', '');
+            viewer.style.display = 'block';
+          }
+        });
+      });
+
+      // Закрываем диалог по кнопке
+      closeBtn.addEventListener('click', function () {
+        if (viewer.close) {
+          viewer.close();
+        } else {
+          viewer.removeAttribute('open');
+          viewer.style.display = 'none';
+        }
+        // После закрытия обнуляем src, чтобы остановить воспроизведение
+        frame.src = '';
+      });
+    });
+  </script>
+
 <!-- === Скрипт модалки примеров (единственный, без конфликтов) === -->
 <!-- Официальный авто‑ресайзер Яндекс Форм -->
 <script src="https://yastatic.net/s3/frontend/forms/_/embed.js"></script>
 </body>
 </html>
-
 
 
